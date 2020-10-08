@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>~</title>
+</head>
+<body>
 <script>
   const CONFIG = {
     /**
@@ -39,15 +46,7 @@
         color: 'linear-gradient(135deg, #fca550, #fcd050)',
       },
       {
-        category: 'Lurk',
-        name: 'Hunt',
-        key: 'p',
-        url: 'https://www.producthunt.com',
-        search: '/search?q={}',
-        color: 'linear-gradient(135deg, #da552f, #da802f)',
-      },
-      {
-        category: 'Lurk',
+        category: 'Leisure',
         name: 'Reddit',
         key: 'r',
         url: 'https://www.reddit.com',
@@ -55,91 +54,12 @@
         color: 'linear-gradient(135deg, #5f99cf, #5f7dcf)',
       },
       {
-        category: 'Lurk',
-        name: 'Unsplash',
-        key: 'u',
-        url: 'https://unsplash.com/new',
-        search: '/search/{}',
-        color: '#000',
-      },
-      {
-        category: 'Listen',
-        name: 'Hypem',
-        key: 'h',
-        url: 'https://hypem.com/popular',
-        search: '/search/{}',
-        color: 'linear-gradient(135deg, #83c441, #62c441)',
-      },
-      {
-        category: 'Listen',
-        name: 'SoundCloud',
-        key: 'S',
-        url: 'https://soundcloud.com/discover',
-        search: '/search?q={}',
-        color: 'linear-gradient(135deg, #ff8800, #ffc800)',
-      },
-      {
-        category: 'Listen',
-        name: 'Spotify',
-        key: 's',
-        url: 'https://open.spotify.com',
-        search: '/search/{}',
-        color: 'linear-gradient(135deg, #1DB954, #1Da974)',
-      },
-      {
-        category: 'Watch',
-        name: 'Netflix',
-        key: 'n',
-        url: 'https://www.netflix.com/browse',
-        search: '/search?q={}',
-        color: 'linear-gradient(135deg, #e50914, #e53509)',
-      },
-      {
-        category: 'Watch',
-        name: 'Twitch',
-        key: 't',
-        url: 'https://www.twitch.tv/directory/following',
-        color: 'linear-gradient(135deg, #6441a5, #7d41a5)',
-      },
-      {
-        category: 'Watch',
+        category: 'Leisure',
         name: 'YouTube',
         key: 'y',
         url: 'https://youtube.com/feed/subscriptions',
         search: '/results?search_query={}',
         color: 'linear-gradient(135deg, #cd201f, #cd4c1f)',
-      },
-      {
-        category: 'Learn',
-        name: 'Academy',
-        key: 'a',
-        url: 'https://www.khanacademy.org',
-        search: '/search?page_search_query={}',
-        color: 'linear-gradient(135deg, #9cb443, #80b443)',
-      },
-      {
-        category: 'Learn',
-        name: 'Coursera',
-        key: 'c',
-        url: 'https://www.coursera.org',
-        search: '/courses?query={}',
-        color: 'linear-gradient(135deg, #407ED7, #4058d7)',
-      },
-      {
-        category: 'Learn',
-        name: 'Egghead',
-        key: 'e',
-        url: 'https://egghead.io',
-        search: '/search?q={}',
-        color: 'linear-gradient(135deg, #171C23, #171923)',
-      },
-      {
-        category: 'Download',
-        name: 'Bay',
-        key: 'b',
-        url: 'https://thepiratebay.org',
-        search: '/search/{}',
-        color: 'linear-gradient(135deg, #d2b9a6, #d2c4a6)',
       },
       {
         category: 'Download',
@@ -148,14 +68,6 @@
         url: 'https://yts.mx/browse-movies/0/all/all/7/seeds/0/en',
         search: '/browse-movies/{}',
         color: 'linear-gradient(135deg, #2f2f2f, #373737)',
-      },
-      {
-        category: 'Download',
-        name: '7digital',
-        key: '7',
-        url: 'https://us.7digital.com',
-        search: '/search?q={}',
-        color: 'linear-gradient(135deg, #07606e, #07466e)',
       },
     ],
 
@@ -332,7 +244,7 @@
     top: 0;
     left: 0;
     overflow: auto;
-    width: 100%;
+    
     height: 100%;
     visibility: hidden;
   }
@@ -508,9 +420,10 @@
     }
 
     .categories {
+      width: 960px;
       display: grid;
-      grid-template-columns: 250px 175px;
-      justify-content: space-around;
+      grid-template-columns: repeat(3, 250px);
+  
     }
 
     .category:nth-last-child(2) {
@@ -537,21 +450,19 @@
     }
 
     .categories {
-      grid-template-columns: repeat(2, 300px) 175px;
+      grid-template-columns: repeat(3, 300px);
+      justify-content: space-around;
     }
   }
 
   @media (min-width: 1500px) {
     .categories {
-      grid-template-columns: repeat(5, 220px) 175px;
+      grid-template-columns: repeat(3, 250px);
+      justify-content: center;
     }
   }
 </style>
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex" />
-<title>~</title>
 
 <div class="center"><time class="clock" id="clock"></time></div>
 
@@ -1264,4 +1175,53 @@
   }
 </script>
 
+<script>
+  const queryParser = new QueryParser({
+    commands: CONFIG.commands,
+    pathDelimiter: CONFIG.pathDelimiter,
+    searchDelimiter: CONFIG.searchDelimiter,
+  });
 
+  const influencers = CONFIG.influencers.map(influencerConfig => {
+    return new {
+      Default: DefaultInfluencer,
+      DuckDuckGo: DuckDuckGoInfluencer,
+      History: HistoryInfluencer,
+    }[influencerConfig.name]({
+      defaultSuggestions: CONFIG.defaultSuggestions,
+      limit: influencerConfig.limit,
+      parseQuery: queryParser.parse,
+    });
+  });
+
+  const suggester = new Suggester({
+    enabled: CONFIG.suggestions,
+    influencers,
+    limit: CONFIG.suggestionsLimit,
+  });
+
+  const help = new Help({
+    colors: CONFIG.colors,
+    commands: CONFIG.commands,
+    newTab: CONFIG.newTab,
+  });
+
+  const form = new Form({
+    colors: CONFIG.colors,
+    instantRedirect: CONFIG.instantRedirect,
+    newTab: CONFIG.newTab,
+    parseQuery: queryParser.parse,
+    suggester,
+    toggleHelp: help.toggle,
+  });
+
+  new Clock({
+    delimiter: CONFIG.clockDelimiter,
+    onClick: CONFIG.clockAction === 'Search' ? form.show : help.toggle,
+    twentyFourHour: CONFIG.twentyFourHourClock,
+  });
+</script>
+
+
+</body>
+</html>
