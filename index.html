@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<head>
-
-</head>
 <script>
   const CONFIG = {
     /**
@@ -1267,49 +1264,4 @@
   }
 </script>
 
-<script>
-  const queryParser = new QueryParser({
-    commands: CONFIG.commands,
-    pathDelimiter: CONFIG.pathDelimiter,
-    searchDelimiter: CONFIG.searchDelimiter,
-  });
 
-  const influencers = CONFIG.influencers.map(influencerConfig => {
-    return new {
-      Default: DefaultInfluencer,
-      DuckDuckGo: DuckDuckGoInfluencer,
-      History: HistoryInfluencer,
-    }[influencerConfig.name]({
-      defaultSuggestions: CONFIG.defaultSuggestions,
-      limit: influencerConfig.limit,
-      parseQuery: queryParser.parse,
-    });
-  });
-
-  const suggester = new Suggester({
-    enabled: CONFIG.suggestions,
-    influencers,
-    limit: CONFIG.suggestionsLimit,
-  });
-
-  const help = new Help({
-    colors: CONFIG.colors,
-    commands: CONFIG.commands,
-    newTab: CONFIG.newTab,
-  });
-
-  const form = new Form({
-    colors: CONFIG.colors,
-    instantRedirect: CONFIG.instantRedirect,
-    newTab: CONFIG.newTab,
-    parseQuery: queryParser.parse,
-    suggester,
-    toggleHelp: help.toggle,
-  });
-
-  new Clock({
-    delimiter: CONFIG.clockDelimiter,
-    onClick: CONFIG.clockAction === 'Search' ? form.show : help.toggle,
-    twentyFourHour: CONFIG.twentyFourHourClock,
-  });
-</script>
