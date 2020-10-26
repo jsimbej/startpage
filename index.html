@@ -15,7 +15,7 @@
      */
     commands: [
       {
-        name: 'DuckDuckGo',
+        name: 'Google',
         key: '*',
         url: 'https://encrypted.google.com',
         search: '/search?q={}',
@@ -154,7 +154,7 @@
     --background: #fffef8;
     --foreground: #3e4959;
     --searchBackground: #3e4959;
-    --searchForeground: #fffef8;
+    --searchForeground: #f8bbd0;
 
     /* fonts */
     --font-family: 'Lato', sans-serif;
@@ -1157,7 +1157,7 @@
       if (!this._colors) return;
       const color = this._parseQuery(query).color;
       if (!color) return;
-      this._formEl.style.background = color;
+      this._formEl.style.background = '#222';
     }
 
     _submitForm(e) {
