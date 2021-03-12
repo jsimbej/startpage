@@ -17,41 +17,17 @@
       {
         name: 'Search',
         key: '*',
-        url: 'https://duckduckgo.com',
-        search: '/?q={}',
+        url: 'http://meme.lol',
+        search: ':8888/?q={}',
         color: '#235',
-      },
-      {
-        category: 'Shop',
-        name: 'pchub',
-        key: 'p',
-        url: 'http://pchubpricelist.online',
-        search: '',
-        color: 'linear-gradient(135deg, #8ccae1, #6dabd6)',
-      },
-      {
-        category: 'Shop',
-        name: 'Shopee',
-        key: 's',
-        url: 'https://shopee.ph',
-        search: '/search?keyword={}&locations=Metro Manila',
-        color: 'linear-gradient(135deg, #8ccae1, #6dabd6)',
       },
       {
         category: 'Shop',
         name: 'Marketplace',
         key: 'm',
         url: 'https://facebook.com',
-          search: '/marketplace/search?query={}',
+        search: '/marketplace/search?query={}',
         color: 'linear-gradient(135deg, #8ccae1, #6dabd6)',
-      },
-      {
-        category: 'Leisure',
-        name: 'Reddit',
-        key: 'r',
-        url: 'https://www.reddit.com',
-        search: '/search?q={}',
-        color: 'linear-gradient(135deg, #5f99cf, #5f7dcf)',
       },
       {
         category: 'Leisure',
@@ -63,44 +39,12 @@
       },
     ],
 
-    /**
-     * Get suggestions as you type.
-     */
-    suggestions: true,
-    suggestionsLimit: 4,
-
-    /**
-     * The order and limit for each suggestion influencer. An "influencer" is
-     * just a suggestion source. The following influencers are available:
-     *
-     * - "Default" suggestions come from CONFIG.defaultSuggestions
-     * - "DuckDuckGo" suggestions come from the duck duck go search api
-     * - "History" suggestions come from your previously entered queries
-     */
-    influencers: [
-      { name: 'Default', limit: 4 },
-      { name: 'History', limit: 1 },
-      { name: 'DuckDuckGo', limit: 4 },
-    ],
-
-    /**
-     * Default search suggestions for the specified queries.
-     */
-    defaultSuggestions: {
-      g: ['g/issues', 'g/pulls', 'gist.github.com'],
-      r: ['r/r/unixporn', 'r/r/startpages'],
-    },
-
-    /**
-     * Instantly redirect when a key is matched. Put a space before any other
-     * queries to prevent unwanted redirects.
-     */
     instantRedirect: false,
 
     /**
      * Open triggered queries in a new tab.
      */
-    newTab: true,
+    newTab: false,
 
     /**
      * Use command colors when domains are matched and on the help page.
@@ -148,17 +92,11 @@
     --searchForeground: #f8bbd0;
 
     /* fonts */
-    --font-family: 'Lato', sans-serif;
+    --font-family: sans-serif;
     --base-font-size: 18px;
     --font-weight-normal: 400;
     --font-weight-bold: 700;
   }
-
-  /* to download a different font locally:
-     https://google-webfonts-helper.herokuapp.com/fonts */
-     @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
-     
-
 
 
 </style>
@@ -243,7 +181,7 @@
   .clock {
     display: block;
     margin-top: -0.06rem;
-    font-size: 4rem;
+    font-size: 3.3rem;
     font-weight: var(--font-weight-normal);
     text-align: center;
     letter-spacing: 0.05rem;
@@ -465,7 +403,6 @@
 >
   <div>
     <input class="search-input" id="search-input" title="search" type="text" />
-    <ul class="search-suggestions" id="search-suggestions"></ul>
   </div>
 </form>
 
@@ -530,6 +467,7 @@
         case 224:
           return 'meta';
       }
+        if (e.key === "Super") return 'meta';
 
       if (ctrl) return 'ctrl-*';
       if (meta) return 'meta-*';
@@ -539,374 +477,6 @@
   };
 </script>
 
-
-<script>
-  class Help {
-    constructor(options) {
-      this._el = $.el('#help');
-      this._colors = options.colors;
-      this._commands = options.commands;
-      this._newTab = options.newTab;
-      this._toggled = false;
-      this._handleKeydown = this._handleKeydown.bind(this);
-      this.toggle = this.toggle.bind(this);
-      this._buildAndAppendLists();
-      this._registerEvents();
-    }
-
-    toggle(show) {
-      this._toggled = typeof show !== 'undefined' ? show : !this._toggled;
-      this._toggled ? $.bodyClassAdd('help') : $.bodyClassRemove('help');
-    }
-
-    _buildAndAppendLists() {
-      const lists = document.createElement('ul');
-      lists.classList.add('categories');
-
-      this._getCategories().forEach(category => {
-        lists.insertAdjacentHTML(
-          'beforeend',
-          `<li class="category">
-            <h2 class="category-name">${category}</h2>
-            <ul>${this._buildListCommands(category)}</ul>
-          </li>`
-        );
-      });
-
-      this._el.appendChild(lists);
-    }
-
-    _buildListCommands(currentCategory) {
-      return this._commands
-        .map(({ category, color, name, key, url }, i) => {
-          if (category === currentCategory) {
-            return `
-              <li class="command">
-                <a href="${url}" target="${this._newTab ? '_blank' : '_self'}">
-                  ${
-                    this._colors
-                      ? `<style>.command-key-${i},.command-name-${i}::after{background:${color};}</style>`
-                      : ''
-                  }
-                  <span class="command-key command-key-${i}">${key}</span>
-                  <span class="command-name command-name-${i}">${name}</span>
-                </a>
-              </li>
-            `;
-          }
-        })
-        .join('');
-    }
-
-    _getCategories() {
-      const categories = this._commands
-        .map(v => v.category)
-        .filter(category => category);
-
-      return [...new Set(categories)];
-    }
-
-    _handleKeydown(e) {
-      if ($.key(e) === 'escape') this.toggle(false);
-    }
-
-    _registerEvents() {
-      document.addEventListener('keydown', this._handleKeydown);
-    }
-  }
-</script>
-
-<script>
-  class Influencer {
-    constructor(options) {
-      this._limit = options.limit;
-      this._parseQuery = options.parseQuery;
-    }
-
-    addItem() {}
-    getSuggestions() {}
-
-    _addSearchPrefix(items, query) {
-      const searchPrefix = this._getSearchPrefix(query);
-      return items.map(s => (searchPrefix ? searchPrefix + s : s));
-    }
-
-    _getSearchPrefix(query) {
-      const { isSearch, key, split } = this._parseQuery(query);
-      return isSearch ? `${key}${split} ` : false;
-    }
-  }
-</script>
-
-<script>
-  class DefaultInfluencer extends Influencer {
-    constructor({ defaultSuggestions }) {
-      super(...arguments);
-      this._defaultSuggestions = defaultSuggestions;
-    }
-
-    getSuggestions(query) {
-      return new Promise(resolve => {
-        const suggestions = this._defaultSuggestions[query];
-        resolve(suggestions ? suggestions.slice(0, this._limit) : []);
-      });
-    }
-  }
-</script>
-
-<script>
-  class DuckDuckGoInfluencer extends Influencer {
-    constructor({ queryParser }) {
-      super(...arguments);
-    }
-
-    getSuggestions(rawQuery) {
-      const { query } = this._parseQuery(rawQuery);
-      if (!query) return Promise.resolve([]);
-
-      return new Promise(resolve => {
-        const endpoint = 'https://duckduckgo.com/ac/';
-        const callback = 'autocompleteCallback';
-
-        window[callback] = res => {
-          const suggestions = res
-            .map(i => i.phrase)
-            .filter(s => !$.ieq(s, query))
-            .slice(0, this._limit);
-
-          resolve(this._addSearchPrefix(suggestions, rawQuery));
-        };
-
-        $.jsonp(`${endpoint}?callback=${callback}&q=${query}`);
-      });
-    }
-  }
-</script>
-
-<script>
-  class HistoryInfluencer extends Influencer {
-    constructor() {
-      super(...arguments);
-      this._storeName = 'history';
-    }
-
-    addItem(query) {
-      if (query.length < 2) return;
-      let exists;
-
-      const history = this._getHistory().map(([item, count]) => {
-        const match = $.ieq(item, query);
-        if (match) exists = true;
-        return [item, match ? count + 1 : count];
-      });
-
-      if (!exists) history.push([query, 1]);
-
-      const sorted = history
-        .sort((current, next) => current[1] - next[1])
-        .reverse();
-
-      this._setHistory(sorted);
-    }
-
-    getSuggestions(query) {
-      return new Promise(resolve => {
-        const suggestions = this._getHistory()
-          .map(([item]) => item)
-          .filter(item => query && !$.ieq(item, query) && $.iin(item, query))
-          .slice(0, this._limit);
-
-        resolve(suggestions);
-      });
-    }
-
-    _fetch() {
-      return JSON.parse(localStorage.getItem(this._storeName)) || [];
-    }
-
-    _getHistory() {
-      this._history = this._history || this._fetch();
-      return this._history;
-    }
-
-    _save(history) {
-      localStorage.setItem(this._storeName, JSON.stringify(history));
-    }
-
-    _setHistory(history) {
-      this._history = history;
-      this._save(history);
-    }
-  }
-</script>
-
-<script>
-  class Suggester {
-    constructor(options) {
-      this._el = $.el('#search-suggestions');
-      this._enabled = options.enabled;
-      this._influencers = options.influencers;
-      this._limit = options.limit;
-      this._suggestionEls = [];
-      this._handleKeydown = this._handleKeydown.bind(this);
-      this._registerEvents();
-    }
-
-    setOnClick(callback) {
-      this._onClick = callback;
-    }
-
-    setOnHighlight(callback) {
-      this._onHighlight = callback;
-    }
-
-    setOnUnhighlight(callback) {
-      this._onUnhighlight = callback;
-    }
-
-    success(query) {
-      this._clearSuggestions();
-      this._influencers.forEach(i => i.addItem(query));
-    }
-
-    suggest(input) {
-      if (!this._enabled) return;
-      input = input.trim();
-      if (input === '') this._clearSuggestions();
-
-      Promise.all(this._getInfluencerPromises(input)).then(res => {
-        const suggestions = $.flattenAndUnique(res);
-        this._clearSuggestions();
-
-        if (suggestions.length) {
-          this._appendSuggestions(suggestions, input);
-          this._registerSuggestionHighlightEvents();
-          this._registerSuggestionClickEvents();
-          $.bodyClassAdd('suggestions');
-        }
-      });
-    }
-
-    _appendSuggestions(suggestions, input) {
-      suggestions.some((suggestion, i) => {
-        const match = new RegExp($.escapeRegex(input), 'ig');
-        const suggestionHtml = suggestion.replace(match, `<b>${input}</b>`);
-
-        this._el.insertAdjacentHTML(
-          'beforeend',
-          `<li>
-            <button
-              type="button"
-              class="js-search-suggestion search-suggestion"
-              data-suggestion="${suggestion}"
-              tabindex="-1"
-            >
-              ${suggestionHtml}
-            </button>
-          </li>`
-        );
-
-        if (i + 1 >= this._limit) return true;
-      });
-
-      this._suggestionEls = $.els('.js-search-suggestion');
-    }
-
-    _clearSuggestionClickEvents() {
-      this._suggestionEls.forEach(el => {
-        el.removeEventListener('click', this._onClick);
-      });
-    }
-
-    _clearSuggestionHighlightEvents() {
-      this._suggestionEls.forEach(el => {
-        el.removeEventListener('mouseover', this._highlight);
-        el.removeEventListener('mouseout', this._unHighlight);
-      });
-    }
-
-    _clearSuggestions() {
-      $.bodyClassRemove('suggestions');
-      this._clearSuggestionHighlightEvents();
-      this._clearSuggestionClickEvents();
-      this._suggestionEls = [];
-      this._el.innerHTML = '';
-    }
-
-    _focusNext(e) {
-      const exists = this._suggestionEls.some((el, i) => {
-        if (el.classList.contains('highlight')) {
-          this._highlight(this._suggestionEls[i + 1], e);
-          return true;
-        }
-      });
-
-      if (!exists) this._highlight(this._suggestionEls[0], e);
-    }
-
-    _focusPrevious(e) {
-      const exists = this._suggestionEls.some((el, i) => {
-        if (el.classList.contains('highlight') && i) {
-          this._highlight(this._suggestionEls[i - 1], e);
-          return true;
-        }
-      });
-
-      if (!exists) this._unHighlight(e);
-    }
-
-    _getInfluencerPromises(input) {
-      return this._influencers.map(influencer =>
-        influencer.getSuggestions(input)
-      );
-    }
-
-    _handleKeydown(e) {
-      if ($.isDown(e)) this._focusNext(e);
-      if ($.isUp(e)) this._focusPrevious(e);
-    }
-
-    _highlight(el, e) {
-      this._unHighlight();
-      if (!el) return;
-      this._onHighlight(el.getAttribute('data-suggestion'));
-      el.classList.add('highlight');
-      e.preventDefault();
-    }
-
-    _registerEvents() {
-      document.addEventListener('keydown', this._handleKeydown);
-    }
-
-    _registerSuggestionClickEvents() {
-      this._suggestionEls.forEach(el => {
-        const value = el.getAttribute('data-suggestion');
-        el.addEventListener('click', this._onClick.bind(null, value));
-      });
-    }
-
-    _registerSuggestionHighlightEvents() {
-      const noHighlightUntilMouseMove = () => {
-        window.removeEventListener('mousemove', noHighlightUntilMouseMove);
-
-        this._suggestionEls.forEach(el => {
-          el.addEventListener('mouseover', this._highlight.bind(this, el));
-          el.addEventListener('mouseout', this._unHighlight.bind(this));
-        });
-      };
-
-      window.addEventListener('mousemove', noHighlightUntilMouseMove);
-    }
-
-    _unHighlight(e) {
-      const el = $.el('.highlight');
-      if (!el) return;
-      this._onUnhighlight();
-      el.classList.remove('highlight');
-      if (e) e.preventDefault();
-    }
-  }
-</script>
 
 <script>
   class QueryParser {
@@ -1016,8 +586,6 @@
       this._instantRedirect = options.instantRedirect;
       this._newTab = options.newTab;
       this._parseQuery = options.parseQuery;
-      this._suggester = options.suggester;
-      this._toggleHelp = options.toggleHelp;
       this._clearPreview = this._clearPreview.bind(this);
       this._handleInput = this._handleInput.bind(this);
       this._handleKeydown = this._handleKeydown.bind(this);
@@ -1034,7 +602,6 @@
       $.bodyClassRemove('form');
       this._inputEl.value = '';
       this._inputElVal = '';
-      this._suggester.suggest('');
       this._setBackgroundFromQuery('');
     }
 
@@ -1053,7 +620,6 @@
       const isHelp = newQuery === '?';
       const { isKey } = this._parseQuery(newQuery);
       this._inputElVal = newQuery;
-      this._suggester.suggest(newQuery);
       this._setBackgroundFromQuery(newQuery);
       if (!newQuery || isHelp) this.hide();
       if (isHelp) this._toggleHelp();
@@ -1099,12 +665,6 @@
       document.addEventListener('keydown', this._handleKeydown);
       this._inputEl.addEventListener('input', this._handleInput);
       this._formEl.addEventListener('submit', this._submitForm, false);
-
-      if (this._suggester) {
-        this._suggester.setOnClick(this._submitWithValue);
-        this._suggester.setOnHighlight(this._previewValue);
-        this._suggester.setOnUnhighlight(this._clearPreview);
-      }
     }
 
     _setBackgroundFromQuery(query) {
@@ -1117,7 +677,6 @@
     _submitForm(e) {
       if (e) e.preventDefault();
       const query = this._inputEl.value;
-      if (this._suggester) this._suggester.success(query);
       this.hide();
       this._redirect(this._parseQuery(query).redirect);
     }
@@ -1136,37 +695,12 @@
     searchDelimiter: CONFIG.searchDelimiter,
   });
 
-  const influencers = CONFIG.influencers.map(influencerConfig => {
-    return new {
-      Default: DefaultInfluencer,
-      DuckDuckGo: DuckDuckGoInfluencer,
-      History: HistoryInfluencer,
-    }[influencerConfig.name]({
-      defaultSuggestions: CONFIG.defaultSuggestions,
-      limit: influencerConfig.limit,
-      parseQuery: queryParser.parse,
-    });
-  });
-
-  const suggester = new Suggester({
-    enabled: CONFIG.suggestions,
-    influencers,
-    limit: CONFIG.suggestionsLimit,
-  });
-
-  const help = new Help({
-    colors: CONFIG.colors,
-    commands: CONFIG.commands,
-    newTab: CONFIG.newTab,
-  });
 
   const form = new Form({
     colors: CONFIG.colors,
     instantRedirect: CONFIG.instantRedirect,
     newTab: CONFIG.newTab,
     parseQuery: queryParser.parse,
-    suggester,
-    toggleHelp: help.toggle,
   });
 
 </script>
