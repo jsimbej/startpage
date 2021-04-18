@@ -19,7 +19,7 @@
         key: '*',
         url: 'http://meme.lol',
         search: ':8888/?q={}',
-        color: '#235',
+        color: '#2e3440',
       },
       {
         category: 'Leisure',
@@ -78,10 +78,10 @@
 <style type="text/css">
   :root {
     /* colors */
-    --background: #fffdea;
-    --foreground: #3e4959;
-    --searchBackground: #3e4959;
-    --searchForeground: #f8bbd0;
+    --background: #ffbbd0;
+    --foreground: #212121;
+    --searchBackground: #2e3440;
+    --searchForeground: #ffa0be;
 
     /* fonts */
     --font-family: sans-serif;
@@ -391,7 +391,7 @@
 
 <div class="center">
   <div class="clock">
-    Good Morning, Jeremiah!
+    こんいちは, Jeremiah!
     <div class="sub"> { What do you want to do today? } </div>
   </div>
 </div>
@@ -672,7 +672,7 @@
       if (!this._colors) return;
       const color = this._parseQuery(query).color;
       if (!color) return;
-      this._formEl.style.background = '#222';
+      this._formEl.style.background = '#2e3440';
     }
 
     _submitForm(e) {
