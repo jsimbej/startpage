@@ -1,707 +1,713 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~</title>
-  </head>
-  <body>
-    <script>
-      const CONFIG = {
-              /**
-                     * The category, name, key, url, search path and color for your commands.
-                     * If none of the specified keys are matched, the '*' key is used.
-                     * Commands without a category don't show up in the help menu.
-                     */
-              commands: [
-                      {
-                              name: 'Search',
-                              key: '*',
-                              url: 'https://anon.sx',
-                              search: '/?q={}',
-                              color: '#2e3440',
-                            },
-                      {
-                              category: 'Leisure',
-                              name: 'Tube',
-                              key: 'y',
-                              url: 'https://yewtu.be',
-                              search: '/search?q={}',
-                              color: '#2e3440',
-                            },
-
-
-                    ],
-
-              instantRedirect: false,
-              newTab: false,
-              colors: true,
-              searchDelimiter: ':',
-
-              /**
-                     * The delimiter between a command key and a path. For example, you'd type
-                     * "r/r/unixporn" to go to "https://reddit.com/r/unixporn".
-                     */
-              pathDelimiter: '/',
-
-              /**
-                     * The delimiter between the hours and minutes on the clock.
-                     */
-              /**
-                     * Action to take when the clock is clicked. Options include:
-                     *
-                     * - "Menu" to show the help menu
-                     * - "Search" to show the search input
-                     */
-              clockAction: 'Menu',
-            };
-    </script>
-
-    <style type="text/css">
-      :root {
-        /* colors */
-        --background: #26282c;
-        --foreground: #ffa3be;
-        --searchBackground: #2e3440;
-        --searchForeground: #ffa0be;
-
-        /* fonts */
-        --font-family: sans-serif;
-        --base-font-size: 18px;
-        --font-weight-normal: 400;
-        --font-weight-bold: 700;
-      }
-    </style>
-
-    <style type="text/css">
-      * {
-        box-sizing: border-box;
-      }
-
-        html {
-          font-family: var(--font-family);
-          font-size: var(--base-font-size);
-          font-weight: var(--font-weight-normal);
-        }
-
-        body {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          margin: 0;
-          padding: 0;
-          transition: background 0.2s;
-          background: var(--background);
-          color: var(--foreground);
-        }
-
-        input,
-        button {
-          display: block;
-          width: 100%;
-          margin: 0;
-          padding: 0;
-          background: transparent;
-          color: inherit;
-          font-family: var(--font-family);
-          font-size: 1rem;
-        }
-
-        input,
-        button,
-      input:focus,
-      button:focus {
-        border: 0;
-        outline: 0;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-      }
-
-        ul,
-        li {
-          margin: 0;
-          padding: 0;
-          list-style: none;
-        }
-
-        a,
-      a:focus {
-        color: inherit;
-        outline: 0;
-      }
-
-        .center {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 100%;
-          height: 100%;
-        }
-
-        .overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          overflow: auto;
-
-          height: 100%;
-          visibility: hidden;
-        }
-
-        .clock {
-          display: block;
-          margin-top: -0.06rem;
-          font-size: 6rem;
-          font-weight: var(--font-weight-normal);
-          text-align: center;
-          letter-spacing: 0.05rem;
-          cursor: pointer;
-        }
-
-        .am-pm {
-          font-size: 1rem;
-          letter-spacing: 0.1rem;
-        }
-
-        .search-form {
-          background: var(--searchBackground);
-          color: var(--searchForeground);
-          z-index: 2;
-        }
-
-        .search-form > div {
-          width: 100%;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 0 1rem;
-          margin-bottom: 20px;
-          font-size: 1.5rem;
-          font-weight: var(--font-weight-bold);
-          letter-spacing: 0.125rem;
-          text-transform: uppercase;
-        }
-
-        .search-suggestions {
-          display: none;
-          justify-content: center;
-          flex-direction: column;
-          flex-wrap: wrap;
-          overflow: hidden;
-        }
-
-        body.suggestions .search-suggestions {
-          display: flex;
-        }
-
-        .search-suggestion {
-          padding: 0.75rem 1rem;
-          border-radius: 0.25rem;
-          text-align: left;
-          white-space: nowrap;
-          cursor: pointer;
-        }
-
-        .search-suggestion.highlight {
-          background: var(--searchForeground);
-          color: var(--searchBackground);
-        }
-
-        .search-suggestion b {
-          position: relative;
-          font-weight: var(--font-weight-normal);
-        }
-
-        .search-suggestion b::after {
-          content: ' ';
-          position: absolute;
-          right: 0;
-          bottom: 0.1rem;
-          left: 0;
-          height: 4px;
-          background: var(--searchForeground);
-          opacity: 0.4;
-        }
-
-        .search-suggestion.highlight b::after {
-          opacity: 0;
-        }
-
-        .help {
-          display: block;
-          padding: 8vw;
-          background: var(--background);
-          z-index: 1;
-        }
-
-        .sub {
-          font-size: 3rem;
-        }
-
-        .category {
-          margin-bottom: 3rem;
-        }
-
-        .category-name {
-          margin-bottom: 1.5rem;
-          font-size: 0.75rem;
-          letter-spacing: 0.15rem;
-          text-transform: uppercase;
-        }
-
-        .command a {
-          display: flex;
-          position: relative;
-          margin: 1rem 0;
-          line-height: 2rem;
-          text-decoration: none;
-        }
-
-        .command:last-of-type a {
-          margin-bottom: 0;
-        }
-
-        .command-key {
-          display: block;
-          float: left;
-          width: 2rem;
-          height: 2rem;
-          margin-right: 1rem;
-          border-radius: 50%;
-          background: var(--foreground);
-          color: var(--background);
-          font-size: 0.8rem;
-          line-height: 2rem;
-          text-align: center;
-        }
-
-        .command-name {
-          position: relative;
-        }
-
-        .command-name::after {
-          content: ' ';
-          display: none;
-          position: absolute;
-          right: 0;
-          bottom: 0.4rem;
-          left: 0;
-          height: 0.4rem;
-          transition: 0.2s;
-          transform: translateX(-2rem);
-          background: var(--foreground);
-          opacity: 0;
-        }
-
-        body.help .command-name::after {
-          display: block;
-        }
-
-        .command a:hover .command-name::after,
-        .command a:focus .command-name::after {
-          transform: translateX(0);
-          opacity: 0.4;
-        }
-
-        body.help .help,
-        body.form .search-form {
-          visibility: visible;
-        }
-
-        @media (min-width: 500px) {
-          .clock {
-            font-size: 3rem;
-          }
-
-					.sub {
-							font-size: 1.5rem;
-					}
-
-          .search-input {
-            text-align: center;
-          }
-
-          .search-suggestions {
-            align-items: center;
-          }
-
-          .categories {
-            width: 960px;
-            display: grid;
-            grid-template-columns: repeat(3, 250px);
-
-          }
-
-          .category:nth-last-child(2) {
-            margin-bottom: 0;
-          }
-        }
-
-        @media (min-width: 1000px) {
-          .help {
-            display: flex;
-            padding: 0;
-          }
-
-					.clock {
-							font-size: 4.5rem;
-					}
-
-          .search-input {
-            font-size: 2.5rem;
-          }
-
-          .search-suggestions {
-            flex-direction: row;
-          }
-
-          .category {
-            margin: 2rem 0;
-          }
-
-          .categories {
-            grid-template-columns: repeat(3, 300px);
-            justify-content: space-around;
-          }
-        }
-
-        @media (min-width: 1500px) {
-          .categories {
-            grid-template-columns: repeat(3, 250px);
-            justify-content: center;
-          }
-
-					.clock {
-							font-size: 6rem;
-					}
-
-					.sub {
-							font-size: 1.7rem;
-					}
-        }
-    </style>
-
-
-    <div class="center">
-      <div class="clock">
-					Good Day, Jeremiah!
-        <div class="sub"> { What do you want to do today? } </div>
-      </div>
-    </div>
-
-    <form
-        autocomplete="off"
-        class="center overlay search-form"
-        id="search-form"
-        spellcheck="false"
-        >
-        <div>
-          <input class="search-input" id="search-input" title="search" type="text" />
-        </div>
-    </form>
-
-    <aside class="center help overlay" id="help"></aside>
-
-    <script>
-      const $ = {
-              bodyClassAdd: c => $.el('body').classList.add(c),
-              bodyClassRemove: c => $.el('body').classList.remove(c),
-              el: s => document.querySelector(s),
-              els: s => [].slice.call(document.querySelectorAll(s) || []),
-              escapeRegex: s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
-              flattenAndUnique: arr => [...new Set([].concat.apply([], arr))],
-              ieq: (a, b) => a.toLowerCase() === b.toLowerCase(),
-              iin: (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) !== -1,
-              isDown: e => ['ctrl-n', 'down', 'tab'].includes($.key(e)),
-              isRemove: e => ['backspace', 'delete'].includes($.key(e)),
-              isUp: e => ['ctrl-p', 'up', 's-tab'].includes($.key(e)),
-
-              jsonp: url => {
-                      let script = document.createElement('script');
-                      script.src = url;
-                      $.el('head').appendChild(script);
-                    },
-
-              key: e => {
-                      const ctrl = e.ctrlKey;
-                      const meta = e.metaKey;
-                      const shift = e.shiftKey;
-
-                      switch (e.which) {
-                              case 8:
-                                return 'backspace';
-                              case 9:
-                                return shift ? 's-tab' : 'tab';
-                              case 13:
-                                return 'enter';
-                              case 16:
-                                return 'shift';
-                              case 17:
-                                return 'ctrl';
-                              case 18:
-                                return 'alt';
-                              case 27:
-                                return 'escape';
-                              case 38:
-                                return 'up';
-                              case 40:
-                                return 'down';
-                              case 46:
-                                return 'delete';
-                              case 78:
-                                return ctrl ? 'ctrl-n' : 'n';
-                              case 80:
-                                return ctrl ? 'ctrl-p' : 'p';
-                              case 86:
-                                if (ctrl) return 'ctrl-v';
-                                if (meta) return 'ctrl-v';
-                                break;
-                              case 91:
-                              case 93:
-                              case 224:
-                                return 'meta';
-                            }
-                      if (e.key === "Super") return 'meta';
-
-                      if (ctrl) return 'ctrl-*';
-                      if (meta) return 'meta-*';
-                    },
-
-              pad: v => ('0' + v.toString()).slice(-2),
-            };
-    </script>
-
-
-    <script>
-      class QueryParser {
-              constructor(options) {
-                      this._commands = options.commands;
-                      this._searchDelimiter = options.searchDelimiter;
-                      this._pathDelimiter = options.pathDelimiter;
-                      this._protocolRegex = /^[a-zA-Z]+:\/\//i;
-                      this._urlRegex = /^((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)$/i;
-                      this._cachedQuery = '';
-                      this._cachedRes = {};
-                      this.parse = this.parse.bind(this);
-                    }
-
-              parse(query) {
-                      if (this._cachedQuery === query) return this._cachedRes;
-                      this._cachedQuery = query;
-                      const res = { query: query, split: null };
-
-                      if (this._urlRegex.test(query)) {
-                              const hasProtocol = this._protocolRegex.test(query);
-                              res.redirect = hasProtocol ? query : 'http://' + query;
-                            } else {
-                                    const trimmed = query.trim();
-                                    const splitSearch = trimmed.split(this._searchDelimiter);
-                                    const splitPath = trimmed.split(this._pathDelimiter);
-
-                                    this._commands.some(({ category, key, name, search, url }) => {
-                                            if (query === key) {
-                                                    res.key = key;
-                                                    res.isKey = true;
-                                                    res.redirect = url;
-                                                    return true;
-                                                  }
-
-                                            if (splitSearch[0] === key && search) {
-                                                    res.key = key;
-                                                    res.isSearch = true;
-                                                    res.split = this._searchDelimiter;
-                                                    res.query = QueryParser._shiftAndTrim(splitSearch, res.split);
-                                                    res.redirect = QueryParser._prepSearch(url, search, res.query);
-                                                    return true;
-                                                  }
-
-                                            if (splitPath[0] === key) {
-                                                    res.key = key;
-                                                    res.isPath = true;
-                                                    res.split = this._pathDelimiter;
-                                                    res.path = QueryParser._shiftAndTrim(splitPath, res.split);
-                                                    res.redirect = QueryParser._prepPath(url, res.path);
-                                                    return true;
-                                                  }
-
-                                            if (key === '*') {
-                                                    res.redirect = QueryParser._prepSearch(url, search, query);
-                                                  }
-                                          });
-                                  }
-
-                      res.color = QueryParser._getColorFromUrl(this._commands, res.redirect);
-                      this._cachedRes = res;
-                      return res;
-                    }
-
-              static _getColorFromUrl(commands, url) {
-                      const domain = new URL(url).hostname;
-
-                      return (
-                              commands
-                              .filter(c => new URL(c.url).hostname.includes(domain))
-                              .map(c => c.color)[0] || null
-                            );
-                    }
-
-              static _prepPath(url, path) {
-                      return QueryParser._stripUrlPath(url) + '/' + path;
-                    }
-
-              static _prepSearch(url, searchPath, query) {
-                      if (!searchPath) return url;
-                      const baseUrl = QueryParser._stripUrlPath(url);
-                      const urlQuery = encodeURIComponent(query);
-                      searchPath = searchPath.replace('{}', urlQuery);
-                      return baseUrl + searchPath;
-                    }
-
-              static _shiftAndTrim(arr, delimiter) {
-                      arr.shift();
-                      return arr.join(delimiter).trim();
-                    }
-
-              static _stripUrlPath(url) {
-                      const parser = document.createElement('a');
-                      parser.href = url;
-                      return `${parser.protocol}//${parser.hostname}`;
-                    }
-            }
-    </script>
-
-    <script>
-      class Form {
-              constructor(options) {
-                      this._colors = options.colors;
-                      this._formEl = $.el('#search-form');
-                      this._inputEl = $.el('#search-input');
-                      this._inputElVal = '';
-                      this._instantRedirect = options.instantRedirect;
-                      this._newTab = options.newTab;
-                      this._parseQuery = options.parseQuery;
-                      this._clearPreview = this._clearPreview.bind(this);
-                      this._handleInput = this._handleInput.bind(this);
-                      this._handleKeydown = this._handleKeydown.bind(this);
-                      this._previewValue = this._previewValue.bind(this);
-                      this._submitForm = this._submitForm.bind(this);
-                      this._submitWithValue = this._submitWithValue.bind(this);
-                      this.hide = this.hide.bind(this);
-                      this.show = this.show.bind(this);
-                      this._registerEvents();
-                      this._loadQueryParam();
-                    }
-
-              hide() {
-                      $.bodyClassRemove('form');
-                      this._inputEl.value = '';
-                      this._inputElVal = '';
-                      this._setBackgroundFromQuery('');
-                    }
-
-              show() {
-                      $.bodyClassAdd('form');
-                      this._inputEl.focus();
-                    }
-
-              _clearPreview() {
-                      this._previewValue(this._inputElVal);
-                      this._inputEl.focus();
-                    }
-
-              _handleInput() {
-                      const newQuery = this._inputEl.value;
-                      const isHelp = newQuery === '?';
-                      const { isKey } = this._parseQuery(newQuery);
-                      this._inputElVal = newQuery;
-                      this._setBackgroundFromQuery(newQuery);
-                      if (!newQuery || isHelp) this.hide();
-                      if (isHelp) this._toggleHelp();
-                      if (this._instantRedirect && isKey) this._submitWithValue(newQuery);
-                    }
-
-              _handleKeydown(e) {
-                      if ($.isUp(e) || $.isDown(e) || $.isRemove(e)) return;
-
-                      switch ($.key(e)) {
-                              case 'alt':
-                              case 'ctrl':
-                              case 'ctrl-*':
-                              case 'enter':
-                              case 'meta':
-                              case 'meta-*':
-                              case 'shift':
-                                return;
-                              case 'escape':
-                                this.hide();
-                                return;
-                            }
-
-                      this.show();
-                    }
-
-              _loadQueryParam() {
-                      const q = new URLSearchParams(window.location.search).get('q');
-                      if (q) this._submitWithValue(q);
-                    }
-
-              _previewValue(value) {
-                      this._inputEl.value = value;
-                      this._setBackgroundFromQuery(value);
-                    }
-
-              _redirect(redirect) {
-                      if (this._newTab) window.open(redirect, '_blank');
-                      else window.location.href = redirect;
-                    }
-
-              _registerEvents() {
-                      document.addEventListener('keydown', this._handleKeydown);
-                      this._inputEl.addEventListener('input', this._handleInput);
-                      this._formEl.addEventListener('submit', this._submitForm, false);
-                    }
-
-              _setBackgroundFromQuery(query) {
-                      if (!this._colors) return;
-                      const color = this._parseQuery(query).color;
-                      if (!color) return;
-                      this._formEl.style.background = '#2e3440';
-                    }
-
-              _submitForm(e) {
-                      if (e) e.preventDefault();
-                      const query = this._inputEl.value;
-                      this.hide();
-                      this._redirect(this._parseQuery(query).redirect);
-                    }
-
-              _submitWithValue(value) {
-                      this._inputEl.value = value;
-                      this._submitForm();
-                    }
-            }
-    </script>
-
-    <script>
-      const queryParser = new QueryParser({
-              commands: CONFIG.commands,
-              pathDelimiter: CONFIG.pathDelimiter,
-              searchDelimiter: CONFIG.searchDelimiter,
-            });
-
-
-            const form = new Form({
-                    colors: CONFIG.colors,
-                    instantRedirect: CONFIG.instantRedirect,
-                    newTab: CONFIG.newTab,
-                    parseQuery: queryParser.parse,
-                  });
-
-    </script>
-
-
-  </body>
+		<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>~</title>
+		</head>
+		<body>
+				<script>
+						const CONFIG = {
+														/**
+																				 * The category, name, key, url, search path and color for your commands.
+																				 * If none of the specified keys are matched, the '*' key is used.
+																				 * Commands without a category don't show up in the help menu.
+																				 */
+														commands: [
+																						{
+																														name: 'Search',
+																														key: '*',
+																														url: 'https://anon.sx',
+																														search: '/?q={}',
+																														color: '#2e3440',
+																												},
+																						{
+																														category: 'Leisure',
+																														name: 'Tube',
+																														key: 'y',
+																														url: 'https://yewtu.be',
+																														search: '/search?q={}',
+																														color: '#2e3440',
+																												},
+																						{
+																														category: 'Leisure',
+																														name: 'Wikipedia',
+																														key: 'w',
+																														url: 'https://en.wikipedia.org',
+																														search: '/w/index.php?title={}',
+																														color: '#2e3440',
+																												},
+																				],
+
+														instantRedirect: false,
+														newTab: false,
+														colors: true,
+														searchDelimiter: ':',
+
+														/**
+																				 * The delimiter between a command key and a path. For example, you'd type
+																				 * "r/r/unixporn" to go to "https://reddit.com/r/unixporn".
+																				 */
+														pathDelimiter: '/',
+
+														/**
+																				 * The delimiter between the hours and minutes on the clock.
+																				 */
+														/**
+																				 * Action to take when the clock is clicked. Options include:
+																				 *
+																				 * - "Menu" to show the help menu
+																				 * - "Search" to show the search input
+																				 */
+														clockAction: 'Menu',
+												};
+				</script>
+
+				<style type="text/css">
+:root {
+		/* colors */
+		--background: #26282c;
+		--foreground: #ffa3be;
+		--searchBackground: #2e3440;
+		--searchForeground: #ffa0be;
+
+		/* fonts */
+		--font-family: sans-serif;
+		--base-font-size: 18px;
+		--font-weight-normal: 400;
+		--font-weight-bold: 700;
+}
+				</style>
+
+				<style type="text/css">
+* {
+		box-sizing: border-box;
+}
+
+				html {
+						font-family: var(--font-family);
+						font-size: var(--base-font-size);
+						font-weight: var(--font-weight-normal);
+				}
+
+				body {
+						position: absolute;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 100%;
+						margin: 0;
+						padding: 0;
+						transition: background 0.2s;
+						background: var(--background);
+						color: var(--foreground);
+				}
+
+				input,
+				button {
+						display: block;
+						width: 100%;
+						margin: 0;
+						padding: 0;
+						background: transparent;
+						color: inherit;
+						font-family: var(--font-family);
+						font-size: 1rem;
+				}
+
+				input,
+				button,
+		input:focus,
+		button:focus {
+				border: 0;
+				outline: 0;
+				-webkit-appearance: none;
+				-moz-appearance: none;
+		}
+
+		ul,
+		li {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+		}
+
+		a,
+a:focus {
+		color: inherit;
+		outline: 0;
+}
+
+		.center {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100%;
+				height: 100%;
+		}
+
+		.overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				overflow: auto;
+
+				height: 100%;
+				visibility: hidden;
+		}
+
+		.clock {
+				display: block;
+				margin-top: -0.06rem;
+				font-size: 6rem;
+				font-weight: var(--font-weight-normal);
+				text-align: center;
+				letter-spacing: 0.05rem;
+				cursor: pointer;
+		}
+
+		.am-pm {
+				font-size: 1rem;
+				letter-spacing: 0.1rem;
+		}
+
+		.search-form {
+				background: var(--searchBackground);
+				color: var(--searchForeground);
+				z-index: 2;
+		}
+
+		.search-form > div {
+				width: 100%;
+		}
+
+		.search-input {
+				width: 100%;
+				padding: 0 1rem;
+				margin-bottom: 20px;
+				font-size: 1.5rem;
+				font-weight: var(--font-weight-bold);
+				letter-spacing: 0.125rem;
+				text-transform: uppercase;
+		}
+
+		.search-suggestions {
+				display: none;
+				justify-content: center;
+				flex-direction: column;
+				flex-wrap: wrap;
+				overflow: hidden;
+		}
+
+		body.suggestions .search-suggestions {
+				display: flex;
+		}
+
+		.search-suggestion {
+				padding: 0.75rem 1rem;
+				border-radius: 0.25rem;
+				text-align: left;
+				white-space: nowrap;
+				cursor: pointer;
+		}
+
+		.search-suggestion.highlight {
+				background: var(--searchForeground);
+				color: var(--searchBackground);
+		}
+
+		.search-suggestion b {
+				position: relative;
+				font-weight: var(--font-weight-normal);
+		}
+
+		.search-suggestion b::after {
+				content: ' ';
+				position: absolute;
+				right: 0;
+				bottom: 0.1rem;
+				left: 0;
+				height: 4px;
+				background: var(--searchForeground);
+				opacity: 0.4;
+		}
+
+		.search-suggestion.highlight b::after {
+				opacity: 0;
+		}
+
+		.help {
+				display: block;
+				padding: 8vw;
+				background: var(--background);
+				z-index: 1;
+		}
+
+		.sub {
+				font-size: 3rem;
+		}
+
+		.category {
+				margin-bottom: 3rem;
+		}
+
+		.category-name {
+				margin-bottom: 1.5rem;
+				font-size: 0.75rem;
+				letter-spacing: 0.15rem;
+				text-transform: uppercase;
+		}
+
+		.command a {
+				display: flex;
+				position: relative;
+				margin: 1rem 0;
+				line-height: 2rem;
+				text-decoration: none;
+		}
+
+		.command:last-of-type a {
+				margin-bottom: 0;
+		}
+
+		.command-key {
+				display: block;
+				float: left;
+				width: 2rem;
+				height: 2rem;
+				margin-right: 1rem;
+				border-radius: 50%;
+				background: var(--foreground);
+				color: var(--background);
+				font-size: 0.8rem;
+				line-height: 2rem;
+				text-align: center;
+		}
+
+		.command-name {
+				position: relative;
+		}
+
+		.command-name::after {
+				content: ' ';
+				display: none;
+				position: absolute;
+				right: 0;
+				bottom: 0.4rem;
+				left: 0;
+				height: 0.4rem;
+				transition: 0.2s;
+				transform: translateX(-2rem);
+				background: var(--foreground);
+				opacity: 0;
+		}
+
+		body.help .command-name::after {
+				display: block;
+		}
+
+		.command a:hover .command-name::after,
+		.command a:focus .command-name::after {
+				transform: translateX(0);
+				opacity: 0.4;
+		}
+
+		body.help .help,
+		body.form .search-form {
+				visibility: visible;
+		}
+
+		@media (min-width: 500px) {
+				.clock {
+						font-size: 3rem;
+				}
+
+				.sub {
+						font-size: 1.5rem;
+				}
+
+				.search-input {
+						text-align: center;
+				}
+
+				.search-suggestions {
+						align-items: center;
+				}
+
+				.categories {
+						width: 960px;
+						display: grid;
+						grid-template-columns: repeat(3, 250px);
+
+				}
+
+				.category:nth-last-child(2) {
+						margin-bottom: 0;
+				}
+		}
+
+		@media (min-width: 1000px) {
+				.help {
+						display: flex;
+						padding: 0;
+				}
+
+				.clock {
+						font-size: 4.5rem;
+				}
+
+				.search-input {
+						font-size: 2.5rem;
+				}
+
+				.search-suggestions {
+						flex-direction: row;
+				}
+
+				.category {
+						margin: 2rem 0;
+				}
+
+				.categories {
+						grid-template-columns: repeat(3, 300px);
+						justify-content: space-around;
+				}
+		}
+
+		@media (min-width: 1500px) {
+				.categories {
+						grid-template-columns: repeat(3, 250px);
+						justify-content: center;
+				}
+
+				.clock {
+						font-size: 6rem;
+				}
+
+				.sub {
+						font-size: 1.7rem;
+				}
+		}
+				</style>
+
+
+				<div class="center">
+						<div class="clock">
+								Good Day, Jeremiah!
+								<div class="sub"> { What do you want to do today? } </div>
+						</div>
+				</div>
+
+				<form
+								autocomplete="off"
+								class="center overlay search-form"
+								id="search-form"
+								spellcheck="false"
+								>
+								<div>
+										<input class="search-input" id="search-input" title="search" type="text" />
+								</div>
+				</form>
+
+				<aside class="center help overlay" id="help"></aside>
+
+				<script>
+						const $ = {
+														bodyClassAdd: c => $.el('body').classList.add(c),
+														bodyClassRemove: c => $.el('body').classList.remove(c),
+														el: s => document.querySelector(s),
+														els: s => [].slice.call(document.querySelectorAll(s) || []),
+														escapeRegex: s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
+														flattenAndUnique: arr => [...new Set([].concat.apply([], arr))],
+														ieq: (a, b) => a.toLowerCase() === b.toLowerCase(),
+														iin: (a, b) => a.toLowerCase().indexOf(b.toLowerCase()) !== -1,
+														isDown: e => ['ctrl-n', 'down', 'tab'].includes($.key(e)),
+														isRemove: e => ['backspace', 'delete'].includes($.key(e)),
+														isUp: e => ['ctrl-p', 'up', 's-tab'].includes($.key(e)),
+
+														jsonp: url => {
+																						let script = document.createElement('script');
+																						script.src = url;
+																						$.el('head').appendChild(script);
+																				},
+
+														key: e => {
+																						const ctrl = e.ctrlKey;
+																						const meta = e.metaKey;
+																						const shift = e.shiftKey;
+
+																						switch (e.which) {
+																														case 8:
+																																return 'backspace';
+																														case 9:
+																																return shift ? 's-tab' : 'tab';
+																														case 13:
+																																return 'enter';
+																														case 16:
+																																return 'shift';
+																														case 17:
+																																return 'ctrl';
+																														case 18:
+																																return 'alt';
+																														case 27:
+																																return 'escape';
+																														case 38:
+																																return 'up';
+																														case 40:
+																																return 'down';
+																														case 46:
+																																return 'delete';
+																														case 78:
+																																return ctrl ? 'ctrl-n' : 'n';
+																														case 80:
+																																return ctrl ? 'ctrl-p' : 'p';
+																														case 86:
+																																if (ctrl) return 'ctrl-v';
+																																if (meta) return 'ctrl-v';
+																																break;
+																														case 91:
+																														case 93:
+																														case 224:
+																																return 'meta';
+																												}
+																						if (e.key === "Super") return 'meta';
+
+																						if (ctrl) return 'ctrl-*';
+																						if (meta) return 'meta-*';
+																				},
+
+														pad: v => ('0' + v.toString()).slice(-2),
+												};
+				</script>
+
+
+				<script>
+						class QueryParser {
+														constructor(options) {
+																						this._commands = options.commands;
+																						this._searchDelimiter = options.searchDelimiter;
+																						this._pathDelimiter = options.pathDelimiter;
+																						this._protocolRegex = /^[a-zA-Z]+:\/\//i;
+																						this._urlRegex = /^((https?:\/\/)?[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)$/i;
+																						this._cachedQuery = '';
+																						this._cachedRes = {};
+																						this.parse = this.parse.bind(this);
+																				}
+
+														parse(query) {
+																						if (this._cachedQuery === query) return this._cachedRes;
+																						this._cachedQuery = query;
+																						const res = { query: query, split: null };
+
+																						if (this._urlRegex.test(query)) {
+																														const hasProtocol = this._protocolRegex.test(query);
+																														res.redirect = hasProtocol ? query : 'http://' + query;
+																												} else {
+																																				const trimmed = query.trim();
+																																				const splitSearch = trimmed.split(this._searchDelimiter);
+																																				const splitPath = trimmed.split(this._pathDelimiter);
+
+																																				this._commands.some(({ category, key, name, search, url }) => {
+																																												if (query === key) {
+																																																				res.key = key;
+																																																				res.isKey = true;
+																																																				res.redirect = url;
+																																																				return true;
+																																																		}
+
+																																												if (splitSearch[0] === key && search) {
+																																																				res.key = key;
+																																																				res.isSearch = true;
+																																																				res.split = this._searchDelimiter;
+																																																				res.query = QueryParser._shiftAndTrim(splitSearch, res.split);
+																																																				res.redirect = QueryParser._prepSearch(url, search, res.query);
+																																																				return true;
+																																																		}
+
+																																												if (splitPath[0] === key) {
+																																																				res.key = key;
+																																																				res.isPath = true;
+																																																				res.split = this._pathDelimiter;
+																																																				res.path = QueryParser._shiftAndTrim(splitPath, res.split);
+																																																				res.redirect = QueryParser._prepPath(url, res.path);
+																																																				return true;
+																																																		}
+
+																																												if (key === '*') {
+																																																				res.redirect = QueryParser._prepSearch(url, search, query);
+																																																		}
+																																										});
+																																		}
+
+																						res.color = QueryParser._getColorFromUrl(this._commands, res.redirect);
+																						this._cachedRes = res;
+																						return res;
+																				}
+
+														static _getColorFromUrl(commands, url) {
+																						const domain = new URL(url).hostname;
+
+																						return (
+																														commands
+																														.filter(c => new URL(c.url).hostname.includes(domain))
+																														.map(c => c.color)[0] || null
+																												);
+																				}
+
+														static _prepPath(url, path) {
+																						return QueryParser._stripUrlPath(url) + '/' + path;
+																				}
+
+														static _prepSearch(url, searchPath, query) {
+																						if (!searchPath) return url;
+																						const baseUrl = QueryParser._stripUrlPath(url);
+																						const urlQuery = encodeURIComponent(query);
+																						searchPath = searchPath.replace('{}', urlQuery);
+																						return baseUrl + searchPath;
+																				}
+
+														static _shiftAndTrim(arr, delimiter) {
+																						arr.shift();
+																						return arr.join(delimiter).trim();
+																				}
+
+														static _stripUrlPath(url) {
+																						const parser = document.createElement('a');
+																						parser.href = url;
+																						return `${parser.protocol}//${parser.hostname}`;
+																				}
+												}
+				</script>
+
+				<script>
+						class Form {
+														constructor(options) {
+																						this._colors = options.colors;
+																						this._formEl = $.el('#search-form');
+																						this._inputEl = $.el('#search-input');
+																						this._inputElVal = '';
+																						this._instantRedirect = options.instantRedirect;
+																						this._newTab = options.newTab;
+																						this._parseQuery = options.parseQuery;
+																						this._clearPreview = this._clearPreview.bind(this);
+																						this._handleInput = this._handleInput.bind(this);
+																						this._handleKeydown = this._handleKeydown.bind(this);
+																						this._previewValue = this._previewValue.bind(this);
+																						this._submitForm = this._submitForm.bind(this);
+																						this._submitWithValue = this._submitWithValue.bind(this);
+																						this.hide = this.hide.bind(this);
+																						this.show = this.show.bind(this);
+																						this._registerEvents();
+																						this._loadQueryParam();
+																				}
+
+														hide() {
+																						$.bodyClassRemove('form');
+																						this._inputEl.value = '';
+																						this._inputElVal = '';
+																						this._setBackgroundFromQuery('');
+																				}
+
+														show() {
+																						$.bodyClassAdd('form');
+																						this._inputEl.focus();
+																				}
+
+														_clearPreview() {
+																						this._previewValue(this._inputElVal);
+																						this._inputEl.focus();
+																				}
+
+														_handleInput() {
+																						const newQuery = this._inputEl.value;
+																						const isHelp = newQuery === '?';
+																						const { isKey } = this._parseQuery(newQuery);
+																						this._inputElVal = newQuery;
+																						this._setBackgroundFromQuery(newQuery);
+																						if (!newQuery || isHelp) this.hide();
+																						if (isHelp) this._toggleHelp();
+																						if (this._instantRedirect && isKey) this._submitWithValue(newQuery);
+																				}
+
+														_handleKeydown(e) {
+																						if ($.isUp(e) || $.isDown(e) || $.isRemove(e)) return;
+
+																						switch ($.key(e)) {
+																														case 'alt':
+																														case 'ctrl':
+																														case 'ctrl-*':
+																														case 'enter':
+																														case 'meta':
+																														case 'meta-*':
+																														case 'shift':
+																																return;
+																														case 'escape':
+																																this.hide();
+																																return;
+																												}
+
+																						this.show();
+																				}
+
+														_loadQueryParam() {
+																						const q = new URLSearchParams(window.location.search).get('q');
+																						if (q) this._submitWithValue(q);
+																				}
+
+														_previewValue(value) {
+																						this._inputEl.value = value;
+																						this._setBackgroundFromQuery(value);
+																				}
+
+														_redirect(redirect) {
+																						if (this._newTab) window.open(redirect, '_blank');
+																						else window.location.href = redirect;
+																				}
+
+														_registerEvents() {
+																						document.addEventListener('keydown', this._handleKeydown);
+																						this._inputEl.addEventListener('input', this._handleInput);
+																						this._formEl.addEventListener('submit', this._submitForm, false);
+																				}
+
+														_setBackgroundFromQuery(query) {
+																						if (!this._colors) return;
+																						const color = this._parseQuery(query).color;
+																						if (!color) return;
+																						this._formEl.style.background = '#2e3440';
+																				}
+
+														_submitForm(e) {
+																						if (e) e.preventDefault();
+																						const query = this._inputEl.value;
+																						this.hide();
+																						this._redirect(this._parseQuery(query).redirect);
+																				}
+
+														_submitWithValue(value) {
+																						this._inputEl.value = value;
+																						this._submitForm();
+																				}
+												}
+				</script>
+
+				<script>
+						const queryParser = new QueryParser({
+														commands: CONFIG.commands,
+														pathDelimiter: CONFIG.pathDelimiter,
+														searchDelimiter: CONFIG.searchDelimiter,
+												});
+
+
+												const form = new Form({
+																				colors: CONFIG.colors,
+																				instantRedirect: CONFIG.instantRedirect,
+																				newTab: CONFIG.newTab,
+																				parseQuery: queryParser.parse,
+																		});
+
+				</script>
+
+
+		</body>
 </html>
